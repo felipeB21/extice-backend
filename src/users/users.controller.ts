@@ -14,15 +14,25 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/CreateUser.dto';
 import mongoose from 'mongoose';
 import { UpdateUserDto } from './dto/UpdateUser.dto';
+import { LoginUserDto } from './dto/LoginUser.dto';
 
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
-  @Post()
+  @Post('/signup')
   @UsePipes(new ValidationPipe())
-  async createUser(@Body() createUserDto: CreateUserDto) {
+  async createUser(
+    @Body() createUserDto: CreateUserDto,
+  ): Promise<{ token: string }> {
     return await this.usersService.createUser(createUserDto);
+  }
+
+  @Post('/login')
+  async loginUser(
+    @Body() loginUserDto: LoginUserDto,
+  ): Promise<{ token: string }> {
+    return await this.usersService.loginUser(loginUserDto);
   }
 
   @Get()
@@ -58,6 +68,6 @@ export class UsersController {
     if (!isValid) throw new HttpException('User not found', 404);
     const deleteUser = await this.usersService.deleteUser(id);
     if (!deleteUser) throw new HttpException('User not found', 404);
-    return deleteUser;
+    return;
   }
 }
