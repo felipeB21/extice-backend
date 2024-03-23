@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Res,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -15,6 +16,7 @@ import { CreateUserDto } from './dto/CreateUser.dto';
 import mongoose from 'mongoose';
 import { UpdateUserDto } from './dto/UpdateUser.dto';
 import { LoginUserDto } from './dto/LoginUser.dto';
+import { Response } from 'express';
 
 @Controller('users')
 export class UsersController {
@@ -24,15 +26,21 @@ export class UsersController {
   @UsePipes(new ValidationPipe())
   async createUser(
     @Body() createUserDto: CreateUserDto,
+    @Res({ passthrough: true }) res: Response,
   ): Promise<{ token: string }> {
-    return await this.usersService.createUser(createUserDto);
+    const { token } = await this.usersService.createUser(createUserDto);
+    res.cookie('jwt', token, { httpOnly: true });
+    return { token };
   }
 
   @Post('/login')
   async loginUser(
     @Body() loginUserDto: LoginUserDto,
+    @Res({ passthrough: true }) res: Response,
   ): Promise<{ token: string }> {
-    return await this.usersService.loginUser(loginUserDto);
+    const { token } = await this.usersService.loginUser(loginUserDto);
+    res.cookie('jwt', token, { httpOnly: true });
+    return { token };
   }
 
   @Get()
